@@ -1,9 +1,18 @@
+using Infrastructure.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddGrpc();
+
+builder.Services.AddSingleton<ApiDataContext>(_ =>
+{
+    string mongoConnectionString = builder.Configuration.GetConnectionString("MongoDB")!;
+    string databaseName = builder.Configuration["MongoDB:DatabaseName"]!;
+    
+    return new ApiDataContext(mongoConnectionString, databaseName);
+});
 
 var app = builder.Build();
 
