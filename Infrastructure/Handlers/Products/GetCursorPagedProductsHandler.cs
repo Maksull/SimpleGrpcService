@@ -1,11 +1,9 @@
-﻿using System.Linq.Expressions;
-using Application.Mediatr.Queries.Products;
+﻿using Application.Mediatr.Queries.Products;
 using Application.Serialization;
 using Domain.Contracts;
 using Domain.Entities;
 using Infrastructure.Data;
 using MediatR;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
@@ -24,28 +22,13 @@ public sealed class GetCursorPagedProductsHandler : IRequestHandler<GetCursorPag
     {
         var productsQuery = _apiDataContext.ProductsDocuments.AsQueryable();
 
-        if (!string.IsNullOrWhiteSpace(request.SearchTerm))
-        {
-            var searchTermFilter =
-                Builders<BsonDocument>.Filter.Regex("name", new BsonRegularExpression(request.SearchTerm, "i"));
-            productsQuery = productsQuery.Where(c => searchTermFilter.Inject());
-        }
-
-        Expression<Func<BsonDocument, object>> keySelector = request.SortColumn?.ToLower() switch
-        {
-            "name" => category => category["name"],
-            "description" => category => category["description"],
-            "categoryId" => category => category["categoryId"],
-            _ => category => category["_id"],
-        };
-
         if (request.SortOrder?.ToLower() == "desc")
         {
-            productsQuery = productsQuery.OrderByDescending(keySelector);
+            productsQuery = productsQuery.OrderByDescending(p => p["_id"]);
         }
         else
         {
-            productsQuery = productsQuery.OrderBy(keySelector);
+            productsQuery = productsQuery.OrderBy(p => p["_id"]);
         }
 
         productsQuery = productsQuery.Where(c => c["_id"] > request.Cursor).Take(request.PageSize);

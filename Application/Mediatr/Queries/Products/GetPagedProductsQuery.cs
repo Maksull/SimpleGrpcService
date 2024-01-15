@@ -4,8 +4,7 @@ using MediatR;
 
 namespace Application.Mediatr.Queries.Products;
 
-public sealed record GetPagedProductsQuery(string? SearchTerm,
-    string? SortColumn,
+public sealed record GetPagedProductsQuery(
     string? SortOrder,
     int Page,
     int PageSize) : IRequest<PagedResponse<Product>>;

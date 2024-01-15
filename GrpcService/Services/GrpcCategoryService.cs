@@ -213,8 +213,7 @@ public sealed class GrpcCategoryService : CategoryServiceProto.CategoryServicePr
     {
         await foreach (var request in requestStream.ReadAllAsync())
         {
-            var response = await _mediator.Send(new GetPagedCategoriesQuery(request.SearchTerm, request.SortColumn,
-                    request.SortOrder, request.Page, request.PageSize),
+            var response = await _mediator.Send(new GetPagedCategoriesQuery(request.SortOrder, request.Page, request.PageSize),
                 context.CancellationToken);
 
             var grpcCategories = response.Items.Select(coreCategory => new Category
@@ -246,7 +245,7 @@ public sealed class GrpcCategoryService : CategoryServiceProto.CategoryServicePr
         {
             var response = await _mediator.Send(new GetCursorPagedCategoriesQuery(request.Cursor,
                     request.PageSize,
-                    request.SearchTerm, request.SortColumn, request.SortOrder),
+                    request.SortOrder),
                 context.CancellationToken);
 
             var grpcCategories = response.Items.Select(coreCategory => new Category
