@@ -1,11 +1,9 @@
-﻿using System.Linq.Expressions;
-using Application.Mediatr.Queries.Categories;
+﻿using Application.Mediatr.Queries.Categories;
 using Application.Serialization;
 using Domain.Contracts;
 using Domain.Entities;
 using Infrastructure.Data;
 using MediatR;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
@@ -24,26 +22,13 @@ public sealed class GetCursorPagedCategoriesHandler : IRequestHandler<GetCursorP
     {
         var categoriesQuery = _apiDataContext.CategoriesDocuments.AsQueryable();
 
-        if (!string.IsNullOrWhiteSpace(request.SearchTerm))
-        {
-            var searchTermFilter =
-                Builders<BsonDocument>.Filter.Regex("name", new BsonRegularExpression(request.SearchTerm, "i"));
-            categoriesQuery = categoriesQuery.Where(c => searchTermFilter.Inject());
-        }
-
-        Expression<Func<BsonDocument, object>> keySelector = request.SortColumn?.ToLower() switch
-        {
-            "name" => category => category["name"],
-            _ => category => category["_id"],
-        };
-
         if (request.SortOrder?.ToLower() == "desc")
         {
-            categoriesQuery = categoriesQuery.OrderByDescending(keySelector);
+            categoriesQuery = categoriesQuery.OrderByDescending(c => c["_id"]);
         }
         else
         {
-            categoriesQuery = categoriesQuery.OrderBy(keySelector);
+            categoriesQuery = categoriesQuery.OrderBy(c => c["_id"]);
         }
 
         categoriesQuery = categoriesQuery.Where(c => c["_id"] > request.Cursor).Take(request.PageSize);

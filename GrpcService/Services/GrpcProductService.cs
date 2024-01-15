@@ -233,7 +233,7 @@ public sealed class GrpcProductService : ProductServiceProto.ProductServiceProto
     {
         await foreach (var request in requestStream.ReadAllAsync())
         {
-            var response = await _mediator.Send(new GetPagedProductsQuery(request.SearchTerm, request.SortColumn,
+            var response = await _mediator.Send(new GetPagedProductsQuery(
                     request.SortOrder, request.Page, request.PageSize),
                 context.CancellationToken);
 
@@ -267,7 +267,7 @@ public sealed class GrpcProductService : ProductServiceProto.ProductServiceProto
         {
             var response = await _mediator.Send(new GetCursorPagedProductsQuery(request.Cursor,
                     request.PageSize,
-                    request.SearchTerm, request.SortColumn, request.SortOrder),
+                    request.SortOrder),
                 context.CancellationToken);
 
             var grpcProducts = response.Items.Select(coreProduct => new Product

@@ -7,6 +7,4 @@ namespace Application.Mediatr.Queries.Categories;
 public sealed record GetCursorPagedCategoriesQuery(
     string Cursor,
     int PageSize,
-    string? SearchTerm,
-    string? SortColumn,
     string? SortOrder) : IRequest<CursorPagedResponse<Category>>;

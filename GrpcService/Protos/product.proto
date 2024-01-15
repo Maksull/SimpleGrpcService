@@ -67,9 +67,7 @@ message PrintProductRequest {
 message GetPagedProductsRequest {
   int32 page = 1;
   int32 page_size = 2;
-  optional string search_term = 3;
-  optional string sort_column = 4;
-  optional string sort_order = 5;
+  optional string sort_order = 3;
 }
 message PagedProductsResponse {
   int32 page = 1;
@@ -83,9 +81,7 @@ message PagedProductsResponse {
 message GetCursorPagedProductsRequest {
   string cursor = 1;
   int32 page_size = 2;
-  optional string search_term = 3;
-  optional string sort_column = 4;
-  optional string sort_order = 5;
+  optional string sort_order = 3;
 }
 message CursorPagedProductsResponse {
   string cursor = 1;

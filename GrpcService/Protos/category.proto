@@ -66,9 +66,7 @@ message PrintCategoryRequest {
 message GetPagedCategoriesRequest {
   int32 page = 1;
   int32 page_size = 2;
-  optional string search_term = 3;
-  optional string sort_column = 4;
-  optional string sort_order = 5;
+  optional string sort_order = 3;
 }
 message PagedCategoriesResponse {
   int32 page = 1;
@@ -82,9 +80,7 @@ message PagedCategoriesResponse {
 message GetCursorPagedCategoriesRequest {
   string cursor = 1;
   int32 page_size = 2;
-  optional string search_term = 3;
-  optional string sort_column = 4;
-  optional string sort_order = 5;
+  optional string sort_order = 3;
 }
 message CursorPagedCategoriesResponse {
   string cursor = 1;
