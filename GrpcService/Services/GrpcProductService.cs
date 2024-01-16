@@ -2,6 +2,7 @@
 using Application.Mediatr.Queries.Products;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
+using MapsterMapper;
 using MediatR;
 using SimpleGrpcProject;
 
@@ -10,11 +11,13 @@ namespace GrpcService.Services;
 public sealed class GrpcProductService : ProductServiceProto.ProductServiceProtoBase
 {
     private readonly IMediator _mediator;
+    private readonly IMapper _mapper;
     private readonly ILogger<GrpcProductService> _logger;
 
-    public GrpcProductService(IMediator mediator, ILogger<GrpcProductService> logger)
+    public GrpcProductService(IMediator mediator, IMapper mapper, ILogger<GrpcProductService> logger)
     {
         _mediator = mediator;
+        _mapper = mapper;
         _logger = logger;
     }
 
@@ -22,13 +25,7 @@ public sealed class GrpcProductService : ProductServiceProto.ProductServiceProto
     {
         var products = await _mediator.Send(new GetProductsQuery());
 
-        var grpcProducts = products.Select(coreProduct => new Product
-        {
-            ProductId = coreProduct.ProductId.ToString(),
-            Name = coreProduct.Name,
-            Description = coreProduct.Description,
-            CategoryId = coreProduct.CategoryId.ToString()
-        });
+        var grpcProducts = products.Select(coreProduct => _mapper.Map<Product>(coreProduct));
 
         return new GetProductsResponse
         {
@@ -47,15 +44,8 @@ public sealed class GrpcProductService : ProductServiceProto.ProductServiceProto
             {
                 var grpcProductsResponse = new GetProductResponse
                 {
-                    Product = new()
-                    {
-                        ProductId = coreProduct.ProductId,
-                        Name = coreProduct.Name,
-                        Description = coreProduct.Description,
-                        CategoryId = coreProduct.CategoryId
-                    }
+                    Product = _mapper.Map<Product>(coreProduct)
                 };
-
 
                 await responseStream.WriteAsync(grpcProductsResponse, context.CancellationToken);
             }
@@ -73,13 +63,7 @@ public sealed class GrpcProductService : ProductServiceProto.ProductServiceProto
         if (product is null)
             throw new RpcException(new Status(StatusCode.NotFound, "The Product was not found"));
 
-        var grpcProduct = new Product
-        {
-            ProductId = product.ProductId,
-            Name = product.Name,
-            Description = product.Description,
-            CategoryId = product.CategoryId
-        };
+        var grpcProduct = _mapper.Map<Product>(product);
 
         return new GetProductResponse
         {
@@ -99,13 +83,7 @@ public sealed class GrpcProductService : ProductServiceProto.ProductServiceProto
 
             if (product is null) continue;
 
-            var grpcProduct = new Product
-            {
-                ProductId = product.ProductId,
-                Name = product.Name,
-                Description = product.Description,
-                CategoryId = product.CategoryId
-            };
+            var grpcProduct = _mapper.Map<Product>(product);
 
             products.Products.Add(grpcProduct);
         }
@@ -124,13 +102,7 @@ public sealed class GrpcProductService : ProductServiceProto.ProductServiceProto
 
             if (product is null) continue;
 
-            var grpcProduct = new Product
-            {
-                ProductId = product.ProductId,
-                Name = product.Name,
-                Description = product.Description,
-                CategoryId = product.CategoryId
-            };
+            var grpcProduct = _mapper.Map<Product>(product);
             var productResponse = new GetProductResponse
             {
                 Product = grpcProduct
@@ -155,16 +127,12 @@ public sealed class GrpcProductService : ProductServiceProto.ProductServiceProto
 
         if (product is null)
             throw new RpcException(new Status(StatusCode.NotFound, "The Product's category was not found"));
+        
+        var grpcProduct = _mapper.Map<Product>(product);
 
         return new CreateProductResponse()
         {
-            Product = new()
-            {
-                ProductId = product.ProductId,
-                Name = product.Name,
-                Description = product.Description,
-                CategoryId = product.CategoryId,
-            }
+            Product = grpcProduct
         };
     }
 
@@ -184,15 +152,11 @@ public sealed class GrpcProductService : ProductServiceProto.ProductServiceProto
         if (product is null)
             throw new RpcException(new Status(StatusCode.NotFound, "The Product's category was not found"));
 
+        var grpcProduct = _mapper.Map<Product>(product);
+        
         return new UpdateProductResponse
         {
-            Product = new()
-            {
-                ProductId = product.ProductId,
-                Name = product.Name,
-                Description = product.Description,
-                CategoryId = product.CategoryId,
-            }
+            Product = grpcProduct
         };
     }
 
@@ -205,15 +169,11 @@ public sealed class GrpcProductService : ProductServiceProto.ProductServiceProto
         if (product is null)
             throw new RpcException(new Status(StatusCode.NotFound, "The Product's category was not found"));
 
+        var grpcProduct = _mapper.Map<Product>(product);
+        
         return new DeleteProductResponse()
         {
-            Product = new()
-            {
-                ProductId = product.ProductId,
-                Name = product.Name,
-                Description = product.Description,
-                CategoryId = product.CategoryId,
-            }
+            Product = grpcProduct
         };
     }
 
@@ -237,13 +197,7 @@ public sealed class GrpcProductService : ProductServiceProto.ProductServiceProto
                     request.SortOrder, request.Page, request.PageSize),
                 context.CancellationToken);
 
-            var grpcProducts = response.Items.Select(coreProduct => new Product
-            {
-                ProductId = coreProduct.ProductId.ToString(),
-                Name = coreProduct.Name,
-                Description = coreProduct.Description,
-                CategoryId = coreProduct.CategoryId.ToString()
-            });
+            var grpcProducts = response.Items.Select(coreProduct => _mapper.Map<Product>(coreProduct));
 
             var categoryResponse = new PagedProductsResponse()
             {
@@ -270,13 +224,7 @@ public sealed class GrpcProductService : ProductServiceProto.ProductServiceProto
                     request.SortOrder),
                 context.CancellationToken);
 
-            var grpcProducts = response.Items.Select(coreProduct => new Product
-            {
-                ProductId = coreProduct.ProductId.ToString(),
-                Name = coreProduct.Name,
-                Description = coreProduct.Description,
-                CategoryId = coreProduct.CategoryId.ToString()
-            });
+            var grpcProducts = response.Items.Select(coreProduct => _mapper.Map<Product>(coreProduct));
 
             var productResponse = new CursorPagedProductsResponse
             {
