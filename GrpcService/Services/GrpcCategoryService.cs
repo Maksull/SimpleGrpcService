@@ -1,5 +1,6 @@
 ﻿using Application.Mediatr.Commands.Categories;
 using Application.Mediatr.Queries.Categories;
+using FluentValidation;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using MapsterMapper;
@@ -59,18 +60,25 @@ public sealed class GrpcCategoryService : CategoryServiceProto.CategoryServicePr
 
     public override async Task<GetCategoryResponse> GetCategory(GetCategoryRequest request, ServerCallContext context)
     {
-        var category = await _mediator.Send(new GetCategoryByIdQuery(request.CategoryId),
-            context.CancellationToken);
-
-        if (category is null)
-            throw new RpcException(new Status(StatusCode.NotFound, "The Category was not found"));
-
-        var grpcCategory = _mapper.Map<Category>(category);
-
-        return new GetCategoryResponse
+        try
         {
-            Category = grpcCategory
-        };
+            var category = await _mediator.Send(new GetCategoryByIdQuery(request.CategoryId),
+                context.CancellationToken);
+
+            if (category is null)
+                throw new RpcException(new Status(StatusCode.NotFound, "The Category was not found"));
+
+            var grpcCategory = _mapper.Map<Category>(category);
+
+            return new GetCategoryResponse
+            {
+                Category = grpcCategory
+            };
+        }
+        catch (ValidationException e)
+        {
+            throw new RpcException(new Status(StatusCode.InvalidArgument, e.Message));
+        }
     }
 
 
@@ -125,7 +133,7 @@ public sealed class GrpcCategoryService : CategoryServiceProto.CategoryServicePr
         };
 
         var category = await _mediator.Send(new CreateCategoryCommand(newCategory), context.CancellationToken);
-        
+
         var grpcCategory = _mapper.Map<Category>(category);
 
         return new CreateCategoryResponse
@@ -147,7 +155,7 @@ public sealed class GrpcCategoryService : CategoryServiceProto.CategoryServicePr
 
         if (category is null)
             throw new RpcException(new Status(StatusCode.NotFound, "The Category was not found"));
-        
+
         var grpcCategory = _mapper.Map<Category>(category);
 
         return new UpdateCategoryResponse
@@ -166,7 +174,7 @@ public sealed class GrpcCategoryService : CategoryServiceProto.CategoryServicePr
             throw new RpcException(new Status(StatusCode.NotFound, "The Category was not found"));
 
         var grpcCategory = _mapper.Map<Category>(category);
-        
+
         return new DeleteCategoryResponse
         {
             Category = grpcCategory
@@ -190,7 +198,8 @@ public sealed class GrpcCategoryService : CategoryServiceProto.CategoryServicePr
     {
         await foreach (var request in requestStream.ReadAllAsync())
         {
-            var response = await _mediator.Send(new GetPagedCategoriesQuery(request.SortOrder, request.Page, request.PageSize),
+            var response = await _mediator.Send(
+                new GetPagedCategoriesQuery(request.SortOrder, request.Page, request.PageSize),
                 context.CancellationToken);
 
             var grpcCategories = response.Items.Select(coreCategory => _mapper.Map<Category>(coreCategory));
