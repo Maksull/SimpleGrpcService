@@ -1,6 +1,9 @@
+using GrpcService.Mapster;
 using GrpcService.Services;
 using Infrastructure.Data;
 using Infrastructure.Handlers.Products;
+using Mapster;
+using MapsterMapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +15,15 @@ builder.Services.AddSingleton<ApiDataContext>(_ =>
     string databaseName = builder.Configuration["MongoDB:DatabaseName"]!;
     
     return new ApiDataContext(mongoConnectionString, databaseName);
+});
+
+TypeAdapterConfig config = new();
+config.Apply(new MapsterRegister());
+builder.Services.AddSingleton(config);
+
+builder.Services.AddSingleton<IMapper>(sp =>
+{
+    return new ServiceMapper(sp, config);
 });
 
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<GetProductsHandler>());

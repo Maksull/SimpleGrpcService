@@ -2,6 +2,7 @@
 using Application.Mediatr.Queries.Categories;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
+using MapsterMapper;
 using MediatR;
 using SimpleGrpcProject;
 
@@ -10,11 +11,13 @@ namespace GrpcService.Services;
 public sealed class GrpcCategoryService : CategoryServiceProto.CategoryServiceProtoBase
 {
     private readonly IMediator _mediator;
+    private readonly IMapper _mapper;
     private readonly ILogger<GrpcCategoryService> _logger;
 
-    public GrpcCategoryService(IMediator mediator, ILogger<GrpcCategoryService> logger)
+    public GrpcCategoryService(IMediator mediator, IMapper mapper, ILogger<GrpcCategoryService> logger)
     {
         _mediator = mediator;
+        _mapper = mapper;
         _logger = logger;
     }
 
@@ -23,11 +26,7 @@ public sealed class GrpcCategoryService : CategoryServiceProto.CategoryServicePr
     {
         var categories = await _mediator.Send(new GetCategoriesQuery(), context.CancellationToken);
 
-        var grpcCategories = categories.Select(coreCategory => new Category
-        {
-            CategoryId = coreCategory.CategoryId.ToString(),
-            Name = coreCategory.Name
-        });
+        var grpcCategories = categories.Select(coreCategory => _mapper.Map<Category>(coreCategory));
 
         return new GetCategoriesResponse
         {
@@ -46,11 +45,7 @@ public sealed class GrpcCategoryService : CategoryServiceProto.CategoryServicePr
             {
                 var grpcCategoryResponse = new GetCategoryResponse
                 {
-                    Category = new()
-                    {
-                        CategoryId = coreCategory.CategoryId,
-                        Name = coreCategory.Name
-                    }
+                    Category = _mapper.Map<Category>(coreCategory)
                 };
 
                 await responseStream.WriteAsync(grpcCategoryResponse, context.CancellationToken);
@@ -70,11 +65,7 @@ public sealed class GrpcCategoryService : CategoryServiceProto.CategoryServicePr
         if (category is null)
             throw new RpcException(new Status(StatusCode.NotFound, "The Category was not found"));
 
-        var grpcCategory = new Category
-        {
-            CategoryId = category.CategoryId,
-            Name = category.Name
-        };
+        var grpcCategory = _mapper.Map<Category>(category);
 
         return new GetCategoryResponse
         {
@@ -95,11 +86,7 @@ public sealed class GrpcCategoryService : CategoryServiceProto.CategoryServicePr
 
             if (category is null) continue;
 
-            var grpcCategory = new Category
-            {
-                CategoryId = category.CategoryId,
-                Name = category.Name,
-            };
+            var grpcCategory = _mapper.Map<Category>(category);
 
             categories.Categories.Add(grpcCategory);
         }
@@ -118,11 +105,7 @@ public sealed class GrpcCategoryService : CategoryServiceProto.CategoryServicePr
 
             if (category is null) continue;
 
-            var grpcCategory = new Category
-            {
-                CategoryId = category.CategoryId,
-                Name = category.Name
-            };
+            var grpcCategory = _mapper.Map<Category>(category);
             var categoryResponse = new GetCategoryResponse
             {
                 Category = grpcCategory
@@ -142,14 +125,12 @@ public sealed class GrpcCategoryService : CategoryServiceProto.CategoryServicePr
         };
 
         var category = await _mediator.Send(new CreateCategoryCommand(newCategory), context.CancellationToken);
+        
+        var grpcCategory = _mapper.Map<Category>(category);
 
         return new CreateCategoryResponse
         {
-            Category = new()
-            {
-                CategoryId = category.CategoryId,
-                Name = category.Name
-            }
+            Category = grpcCategory
         };
     }
 
@@ -166,14 +147,12 @@ public sealed class GrpcCategoryService : CategoryServiceProto.CategoryServicePr
 
         if (category is null)
             throw new RpcException(new Status(StatusCode.NotFound, "The Category was not found"));
+        
+        var grpcCategory = _mapper.Map<Category>(category);
 
         return new UpdateCategoryResponse
         {
-            Category = new()
-            {
-                CategoryId = category.CategoryId,
-                Name = category.Name
-            }
+            Category = grpcCategory
         };
     }
 
@@ -186,13 +165,11 @@ public sealed class GrpcCategoryService : CategoryServiceProto.CategoryServicePr
         if (category is null)
             throw new RpcException(new Status(StatusCode.NotFound, "The Category was not found"));
 
+        var grpcCategory = _mapper.Map<Category>(category);
+        
         return new DeleteCategoryResponse
         {
-            Category = new()
-            {
-                CategoryId = category.CategoryId,
-                Name = category.Name
-            }
+            Category = grpcCategory
         };
     }
 
@@ -216,11 +193,7 @@ public sealed class GrpcCategoryService : CategoryServiceProto.CategoryServicePr
             var response = await _mediator.Send(new GetPagedCategoriesQuery(request.SortOrder, request.Page, request.PageSize),
                 context.CancellationToken);
 
-            var grpcCategories = response.Items.Select(coreCategory => new Category
-            {
-                CategoryId = coreCategory.CategoryId.ToString(),
-                Name = coreCategory.Name
-            });
+            var grpcCategories = response.Items.Select(coreCategory => _mapper.Map<Category>(coreCategory));
 
             var categoryResponse = new PagedCategoriesResponse
             {
@@ -248,11 +221,7 @@ public sealed class GrpcCategoryService : CategoryServiceProto.CategoryServicePr
                     request.SortOrder),
                 context.CancellationToken);
 
-            var grpcCategories = response.Items.Select(coreCategory => new Category
-            {
-                CategoryId = coreCategory.CategoryId.ToString(),
-                Name = coreCategory.Name
-            });
+            var grpcCategories = response.Items.Select(coreCategory => _mapper.Map<Category>(coreCategory));
 
             var categoryResponse = new CursorPagedCategoriesResponse
             {
