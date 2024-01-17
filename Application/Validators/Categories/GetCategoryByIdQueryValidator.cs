@@ -7,6 +7,6 @@ public sealed class GetCategoryByIdQueryValidator : AbstractValidator<GetCategor
 {
     public GetCategoryByIdQueryValidator()
     {
-        RuleFor(r => r.Id).NotEmpty();
+        RuleFor(r => r.Id).NotEmpty().MatchesUlidFormat();
     }
 }
