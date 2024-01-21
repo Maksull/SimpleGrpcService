@@ -40,7 +40,9 @@ message GetProductResponse {
 }
 
 message CreateProductRequest {
-  Product product = 1;
+  string name = 1;
+  string description = 2;
+  string category_id = 3;
 }
 message CreateProductResponse {
   Product product = 1;

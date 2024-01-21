@@ -23,26 +23,34 @@ public sealed class UpdateProductHandler : IRequestHandler<UpdateProductCommand,
     
     public async Task<Product?> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
     {
-        var product = await _mediator.Send(new GetProductByIdQuery(request.Product.ProductId), cancellationToken);
+        var product = await _mediator.Send(new GetProductByIdQuery(request.ProductId), cancellationToken);
 
         if (product is null)
             return null;
         
-        var category = await _mediator.Send(new GetCategoryByIdQuery(request.Product.CategoryId), cancellationToken);
+        var category = await _mediator.Send(new GetCategoryByIdQuery(request.CategoryId), cancellationToken);
 
         if (category is null)
             return null;
         
-        var filter = Builders<BsonDocument>.Filter.Eq("_id", request.Product.ProductId);
+        var filter = Builders<BsonDocument>.Filter.Eq("_id", request.ProductId);
 
-        var serializedData = ProtoBufSerializer.ClassToByteArray(request.Product);
+        Product updateProduct = new()
+        {
+            ProductId = request.ProductId,
+            Name = request.Name,
+            Description = request.Description,
+            CategoryId = request.CategoryId,
+        };
+
+        var serializedData = ProtoBufSerializer.ClassToByteArray(updateProduct);
 
         var update = Builders<BsonDocument>.Update.Set("protobufData", serializedData);
 
         var result = await _apiDataContext.ProductsDocuments.UpdateOneAsync(filter, update, cancellationToken: cancellationToken);
         
         if (result.ModifiedCount != 0)
-            return request.Product;
+            return updateProduct;
 
         return null;
     }

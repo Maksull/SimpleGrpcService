@@ -18,16 +18,24 @@ public sealed class CreateProductHandler : IRequestHandler<CreateProductCommand,
 
     public async Task<Product?> Handle(CreateProductCommand request, CancellationToken cancellationToken)
     {
-        var serializedData = ProtoBufSerializer.ClassToByteArray(request.Product);
+        Product newProduct = new()
+        {
+            ProductId = Ulid.Empty.ToString(),
+            Name = request.Name,
+            Description = request.Description,
+            CategoryId = request.CategoryId,
+        };
+
+        var serializedData = ProtoBufSerializer.ClassToByteArray(newProduct);
 
         var document = new BsonDocument
         {
-            { "_id", Guid.NewGuid().ToString() },
+            { "_id", Ulid.NewUlid().ToString() },
             { "protobufData", serializedData }
         };
 
         await _apiDataContext.ProductsDocuments.InsertOneAsync(document, cancellationToken: cancellationToken);
 
-        return request.Product;
+        return newProduct;
     }
 }
