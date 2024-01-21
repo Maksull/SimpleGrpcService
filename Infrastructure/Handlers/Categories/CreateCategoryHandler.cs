@@ -18,7 +18,13 @@ public sealed class CreateCategoryHandler : IRequestHandler<CreateCategoryComman
     
     public async Task<Category> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
     {
-        var serializedData = ProtoBufSerializer.ClassToByteArray(request.Category);
+        Category newCategory = new()
+        {
+            CategoryId = Ulid.Empty.ToString(),
+            Name = request.CategoryName,
+        };
+
+        var serializedData = ProtoBufSerializer.ClassToByteArray(newCategory);
 
         var document = new BsonDocument
         {
@@ -28,6 +34,6 @@ public sealed class CreateCategoryHandler : IRequestHandler<CreateCategoryComman
 
         await _apiDataContext.CategoriesDocuments.InsertOneAsync(document, cancellationToken: cancellationToken);
 
-        return request.Category;
+        return newCategory;
     }
 }

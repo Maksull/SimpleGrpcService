@@ -22,21 +22,27 @@ public sealed class UpdateCategoryHandler : IRequestHandler<UpdateCategoryComman
 
     public async Task<Category?> Handle(UpdateCategoryCommand request, CancellationToken cancellationToken)
     {
-        var category = await _mediator.Send(new GetCategoryByIdQuery(request.Category.CategoryId), cancellationToken);
+        var category = await _mediator.Send(new GetCategoryByIdQuery(request.CategoryId), cancellationToken);
 
         if (category is null)
             return null;
-        
-        var filter = Builders<BsonDocument>.Filter.Eq("_id", request.Category.CategoryId);
 
-        var serializedData = ProtoBufSerializer.ClassToByteArray(request.Category);
+        var filter = Builders<BsonDocument>.Filter.Eq("_id", request.CategoryId);
+
+        Category updateCategory = new()
+        {
+            CategoryId = request.CategoryId,
+            Name = request.CategoryName,
+        };
+
+        var serializedData = ProtoBufSerializer.ClassToByteArray(updateCategory);
 
         var update = Builders<BsonDocument>.Update.Set("protobufData", serializedData);
 
         var result = await _apiDataContext.CategoriesDocuments.UpdateOneAsync(filter, update, cancellationToken: cancellationToken);
 
         if (result.ModifiedCount != 0)
-            return request.Category;
+            return updateCategory;
 
         return null;
     }

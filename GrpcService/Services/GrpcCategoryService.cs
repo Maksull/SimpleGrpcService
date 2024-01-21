@@ -140,13 +140,7 @@ public sealed class GrpcCategoryService : CategoryServiceProto.CategoryServicePr
     public override async Task<CreateCategoryResponse> CreateCategory(CreateCategoryRequest request,
         ServerCallContext context)
     {
-        Domain.Entities.Category newCategory = new()
-        {
-            CategoryId = Ulid.Empty.ToString(),
-            Name = request.Category.Name
-        };
-
-        var category = await _mediator.Send(new CreateCategoryCommand(newCategory), context.CancellationToken);
+        var category = await _mediator.Send(new CreateCategoryCommand(request.CategoryName), context.CancellationToken);
 
         var grpcCategory = _mapper.Map<Category>(category);
 
@@ -159,13 +153,8 @@ public sealed class GrpcCategoryService : CategoryServiceProto.CategoryServicePr
     public override async Task<UpdateCategoryResponse> UpdateCategory(UpdateCategoryRequest request,
         ServerCallContext context)
     {
-        Domain.Entities.Category updateCategory = new()
-        {
-            CategoryId = request.Category.CategoryId,
-            Name = request.Category.Name,
-        };
-
-        var category = await _mediator.Send(new UpdateCategoryCommand(updateCategory), context.CancellationToken);
+        var category = await _mediator.Send(new UpdateCategoryCommand(request.Category.CategoryId, request.Category.Name),
+                context.CancellationToken);
 
         if (category is null)
             throw new RpcException(new Status(StatusCode.NotFound, "The Category was not found"));

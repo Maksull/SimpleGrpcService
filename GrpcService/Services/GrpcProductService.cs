@@ -137,15 +137,9 @@ public sealed class GrpcProductService : ProductServiceProto.ProductServiceProto
     public override async Task<CreateProductResponse> CreateProduct(CreateProductRequest request,
         ServerCallContext context)
     {
-        Domain.Entities.Product newProduct = new()
-        {
-            ProductId = Ulid.Empty.ToString(),
-            Name = request.Product.Name,
-            Description = request.Product.Description,
-            CategoryId = request.Product.CategoryId,
-        };
 
-        var product = await _mediator.Send(new CreateProductCommand(newProduct), context.CancellationToken);
+        var product = await _mediator.Send(new CreateProductCommand(request.Name, request.Description, request.CategoryId),
+            context.CancellationToken);
 
         if (product is null)
             throw new RpcException(new Status(StatusCode.NotFound, "The Product's category was not found"));
@@ -161,15 +155,9 @@ public sealed class GrpcProductService : ProductServiceProto.ProductServiceProto
     public override async Task<UpdateProductResponse> UpdateProduct(UpdateProductRequest request,
         ServerCallContext context)
     {
-        Domain.Entities.Product updateProduct = new()
-        {
-            ProductId = request.Product.ProductId,
-            Name = request.Product.Name,
-            Description = request.Product.Description,
-            CategoryId = request.Product.CategoryId,
-        };
-
-        var product = await _mediator.Send(new UpdateProductCommand(updateProduct), context.CancellationToken);
+        var product = await _mediator.Send(new UpdateProductCommand(request.Product.ProductId, request.Product.Name, 
+            request.Product.Description, request.Product.CategoryId), 
+            context.CancellationToken);
 
         if (product is null)
             throw new RpcException(new Status(StatusCode.NotFound, "The Product's category was not found"));
