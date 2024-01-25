@@ -1,5 +1,6 @@
 using Application.Validators.Categories;
 using FluentValidation;
+using GrpcService.Interceptors.ExceptionInterceptor;
 using GrpcService.Mapster;
 using GrpcService.Services;
 using Infrastructure.Behaviors;
@@ -11,7 +12,10 @@ using MediatR;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddGrpc();
+builder.Services.AddGrpc(opts =>
+{
+    opts.Interceptors.Add<ExceptionInterceptor>();
+});
 
 builder.Services.AddSingleton<ApiDataContext>(_ =>
 {
