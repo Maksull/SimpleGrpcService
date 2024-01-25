@@ -1,5 +1,10 @@
+
+
+using System.IO.Compression;
 using Application.Validators.Categories;
 using FluentValidation;
+using Grpc.Net.Compression;
+using GrpcService.Compression;
 using GrpcService.Interceptors.ExceptionInterceptor;
 using GrpcService.Mapster;
 using GrpcService.Services;
@@ -14,6 +19,16 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddGrpc(opts =>
 {
+    opts.MaxReceiveMessageSize = 6291456; // 6 MB
+    opts.MaxSendMessageSize = 6291456; // 6 MB
+    opts.CompressionProviders = new List<ICompressionProvider>
+    {
+        new GzipCompressionProvider(CompressionLevel.Fastest), // gzip
+        new BrotliCompressionProvider(CompressionLevel.Fastest) // br
+    };
+    opts.ResponseCompressionAlgorithm = "gzip";
+    opts.ResponseCompressionLevel = CompressionLevel.Fastest; // compression level used if not set on the provider
+    
     opts.Interceptors.Add<ExceptionInterceptor>();
 });
 
