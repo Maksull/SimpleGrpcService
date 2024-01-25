@@ -1,6 +1,5 @@
 ﻿using Application.Mediatr.Commands.Products;
 using Application.Mediatr.Queries.Products;
-using FluentValidation;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using MapsterMapper;
@@ -39,106 +38,78 @@ public sealed class GrpcProductService : ProductServiceProto.ProductServiceProto
     {
         var products = await _mediator.Send(new GetProductsQuery(), context.CancellationToken);
 
-        try
+        foreach (var coreProduct in products)
         {
-            foreach (var coreProduct in products)
+            var grpcProductsResponse = new GetProductResponse
             {
-                var grpcProductsResponse = new GetProductResponse
-                {
-                    Product = _mapper.Map<Product>(coreProduct)
-                };
+                Product = _mapper.Map<Product>(coreProduct)
+            };
 
-                await responseStream.WriteAsync(grpcProductsResponse, context.CancellationToken);
-            }
-        }
-        catch (OperationCanceledException ex)
-        {
-            _logger.LogInformation("Operation was cancelled {CancelledOperationException}", ex.ToString());
+            await responseStream.WriteAsync(grpcProductsResponse, context.CancellationToken);
         }
     }
 
     public override async Task<GetProductResponse> GetProduct(GetProductRequest request, ServerCallContext context)
     {
-        try
+        var product = await _mediator.Send(new GetProductByIdQuery(request.ProductId));
+
+        if (product is null)
+            throw new RpcException(new Status(StatusCode.NotFound, "The Product was not found"));
+
+        var grpcProduct = _mapper.Map<Product>(product);
+
+        return new GetProductResponse
         {
-            var product = await _mediator.Send(new GetProductByIdQuery(request.ProductId));
-
-            if (product is null)
-                throw new RpcException(new Status(StatusCode.NotFound, "The Product was not found"));
-
-            var grpcProduct = _mapper.Map<Product>(product);
-
-            return new GetProductResponse
-            {
-                Product = grpcProduct
-            };
-        }
-        catch (ValidationException e)
-        {
-            throw new RpcException(new Status(StatusCode.InvalidArgument, e.Message));
-        }
+            Product = grpcProduct
+        };
     }
 
     public override async Task<GetProductsResponse> GetMultipleProduct(
         IAsyncStreamReader<GetProductRequest> requestStream, ServerCallContext context)
     {
-        try
+        var products = new GetProductsResponse();
+
+        await foreach (var request in requestStream.ReadAllAsync())
         {
-            var products = new GetProductsResponse();
+            var product = await _mediator.Send(new GetProductByIdQuery(request.ProductId),
+                context.CancellationToken);
 
-            await foreach (var request in requestStream.ReadAllAsync())
-            {
-                var product = await _mediator.Send(new GetProductByIdQuery(request.ProductId),
-                    context.CancellationToken);
+            if (product is null) continue;
 
-                if (product is null) continue;
+            var grpcProduct = _mapper.Map<Product>(product);
 
-                var grpcProduct = _mapper.Map<Product>(product);
-
-                products.Products.Add(grpcProduct);
-            }
-
-            return products;
+            products.Products.Add(grpcProduct);
         }
-        catch (ValidationException e)
-        {
-            throw new RpcException(new Status(StatusCode.InvalidArgument, e.Message));
-        }
+
+        return products;
     }
 
     public override async Task GetProductBidirectional(IAsyncStreamReader<GetProductRequest> requestStream,
         IServerStreamWriter<GetProductResponse> responseStream,
         ServerCallContext context)
     {
-        try
+        await foreach (var request in requestStream.ReadAllAsync())
         {
-            await foreach (var request in requestStream.ReadAllAsync())
+            var product = await _mediator.Send(new GetProductByIdQuery(request.ProductId),
+                context.CancellationToken);
+
+            if (product is null) continue;
+
+            var grpcProduct = _mapper.Map<Product>(product);
+            var productResponse = new GetProductResponse
             {
-                var product = await _mediator.Send(new GetProductByIdQuery(request.ProductId),
-                    context.CancellationToken);
+                Product = grpcProduct
+            };
 
-                if (product is null) continue;
-
-                var grpcProduct = _mapper.Map<Product>(product);
-                var productResponse = new GetProductResponse
-                {
-                    Product = grpcProduct
-                };
-
-                await responseStream.WriteAsync(productResponse, context.CancellationToken);
-            }
-        }
-        catch (ValidationException e)
-        {
-            throw new RpcException(new Status(StatusCode.InvalidArgument, e.Message));
+            await responseStream.WriteAsync(productResponse, context.CancellationToken);
         }
     }
 
     public override async Task<CreateProductResponse> CreateProduct(CreateProductRequest request,
         ServerCallContext context)
     {
-
-        var product = await _mediator.Send(new CreateProductCommand(request.Name, request.Description, request.CategoryId),
+        var product = await _mediator.Send(
+            new CreateProductCommand(request.Name, request.Description, request.CategoryId),
             context.CancellationToken);
 
         if (product is null)
@@ -155,8 +126,8 @@ public sealed class GrpcProductService : ProductServiceProto.ProductServiceProto
     public override async Task<UpdateProductResponse> UpdateProduct(UpdateProductRequest request,
         ServerCallContext context)
     {
-        var product = await _mediator.Send(new UpdateProductCommand(request.Product.ProductId, request.Product.Name, 
-            request.Product.Description, request.Product.CategoryId), 
+        var product = await _mediator.Send(new UpdateProductCommand(request.Product.ProductId, request.Product.Name,
+                request.Product.Description, request.Product.CategoryId),
             context.CancellationToken);
 
         if (product is null)
@@ -173,25 +144,18 @@ public sealed class GrpcProductService : ProductServiceProto.ProductServiceProto
     public override async Task<DeleteProductResponse> DeleteProduct(DeleteProductRequest request,
         ServerCallContext context)
     {
-        try
+        var product = await _mediator.Send(new DeleteProductCommand(request.ProductId),
+            context.CancellationToken);
+
+        if (product is null)
+            throw new RpcException(new Status(StatusCode.NotFound, "The Product's category was not found"));
+
+        var grpcProduct = _mapper.Map<Product>(product);
+
+        return new DeleteProductResponse()
         {
-            var product = await _mediator.Send(new DeleteProductCommand(request.ProductId),
-                context.CancellationToken);
-
-            if (product is null)
-                throw new RpcException(new Status(StatusCode.NotFound, "The Product's category was not found"));
-
-            var grpcProduct = _mapper.Map<Product>(product);
-
-            return new DeleteProductResponse()
-            {
-                Product = grpcProduct
-            };
-        }
-        catch (ValidationException e)
-        {
-            throw new RpcException(new Status(StatusCode.InvalidArgument, e.Message));
-        }
+            Product = grpcProduct
+        };
     }
 
     public override async Task<Empty> PrintProduct(IAsyncStreamReader<PrintProductRequest> requestStream,
@@ -208,32 +172,25 @@ public sealed class GrpcProductService : ProductServiceProto.ProductServiceProto
     public override async Task GetPagedProducts(IAsyncStreamReader<GetPagedProductsRequest> requestStream,
         IServerStreamWriter<PagedProductsResponse> responseStream, ServerCallContext context)
     {
-        try
+        await foreach (var request in requestStream.ReadAllAsync())
         {
-            await foreach (var request in requestStream.ReadAllAsync())
+            var response = await _mediator.Send(new GetPagedProductsQuery(
+                    request.Page, request.PageSize, request.SortOrder),
+                context.CancellationToken);
+
+            var grpcProducts = response.Items.Select(coreProduct => _mapper.Map<Product>(coreProduct));
+
+            var categoryResponse = new PagedProductsResponse()
             {
-                var response = await _mediator.Send(new GetPagedProductsQuery(
-                        request.Page, request.PageSize, request.SortOrder),
-                    context.CancellationToken);
+                Page = response.Page,
+                PageSize = response.PageSize,
+                TotalCount = response.TotalCount,
+                Items = { grpcProducts },
+                IsNextPage = response.IsNextPage,
+                IsPreviousPage = response.IsPreviousPage,
+            };
 
-                var grpcProducts = response.Items.Select(coreProduct => _mapper.Map<Product>(coreProduct));
-
-                var categoryResponse = new PagedProductsResponse()
-                {
-                    Page = response.Page,
-                    PageSize = response.PageSize,
-                    TotalCount = response.TotalCount,
-                    Items = { grpcProducts },
-                    IsNextPage = response.IsNextPage,
-                    IsPreviousPage = response.IsPreviousPage,
-                };
-
-                await responseStream.WriteAsync(categoryResponse, context.CancellationToken);
-            }
-        }
-        catch (ValidationException e)
-        {
-            throw new RpcException(new Status(StatusCode.InvalidArgument, e.Message));
+            await responseStream.WriteAsync(categoryResponse, context.CancellationToken);
         }
     }
 
@@ -241,30 +198,23 @@ public sealed class GrpcProductService : ProductServiceProto.ProductServiceProto
         IServerStreamWriter<CursorPagedProductsResponse> responseStream,
         ServerCallContext context)
     {
-        try
+        await foreach (var request in requestStream.ReadAllAsync())
         {
-            await foreach (var request in requestStream.ReadAllAsync())
+            var response = await _mediator.Send(new GetCursorPagedProductsQuery(request.Cursor,
+                    request.PageSize,
+                    request.SortOrder),
+                context.CancellationToken);
+
+            var grpcProducts = response.Items.Select(coreProduct => _mapper.Map<Product>(coreProduct));
+
+            var productResponse = new CursorPagedProductsResponse
             {
-                var response = await _mediator.Send(new GetCursorPagedProductsQuery(request.Cursor,
-                        request.PageSize,
-                        request.SortOrder),
-                    context.CancellationToken);
+                Cursor = response.Cursor ?? "",
+                PageSize = response.PageSize,
+                Items = { grpcProducts },
+            };
 
-                var grpcProducts = response.Items.Select(coreProduct => _mapper.Map<Product>(coreProduct));
-
-                var productResponse = new CursorPagedProductsResponse
-                {
-                    Cursor = response.Cursor ?? "",
-                    PageSize = response.PageSize,
-                    Items = { grpcProducts },
-                };
-
-                await responseStream.WriteAsync(productResponse, context.CancellationToken);
-            }
-        }
-        catch (ValidationException e)
-        {
-            throw new RpcException(new Status(StatusCode.InvalidArgument, e.Message));
+            await responseStream.WriteAsync(productResponse, context.CancellationToken);
         }
     }
 }
