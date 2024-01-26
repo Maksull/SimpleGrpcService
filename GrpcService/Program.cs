@@ -1,5 +1,4 @@
-
-
+using Calzolari.Grpc.AspNetCore.Validation;
 using System.IO.Compression;
 using Application.Validators.Categories;
 using FluentValidation;
@@ -8,12 +7,14 @@ using GrpcService.Compression;
 using GrpcService.Interceptors.ExceptionInterceptor;
 using GrpcService.Mapster;
 using GrpcService.Services;
+using GrpcService.Validators.Categories;
 using Infrastructure.Behaviors;
 using Infrastructure.Data;
 using Infrastructure.Handlers.Products;
 using Mapster;
 using MapsterMapper;
 using MediatR;
+using GetCategoryByIdQueryValidator = Application.Validators.Categories.GetCategoryByIdQueryValidator;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,7 +31,11 @@ builder.Services.AddGrpc(opts =>
     opts.ResponseCompressionLevel = CompressionLevel.Fastest; // compression level used if not set on the provider
     
     opts.Interceptors.Add<ExceptionInterceptor>();
+    opts.EnableMessageValidation();
 });
+
+builder.Services.AddGrpcValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateCategoryRequestValidator>();
 
 builder.Services.AddSingleton<ApiDataContext>(_ =>
 {

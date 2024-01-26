@@ -45,7 +45,8 @@ message CreateCategoryResponse {
 }
 
 message UpdateCategoryRequest {
-  Category category = 1;
+  string category_id = 1;
+  string name = 2;
 }
 message UpdateCategoryResponse {
   Category category = 1;

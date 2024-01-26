@@ -49,7 +49,10 @@ message CreateProductResponse {
 }
 
 message UpdateProductRequest {
-  Product product = 1;
+  string product_id = 1;
+  string name = 2;
+  string description = 3;
+  string category_id = 4;
 }
 message UpdateProductResponse {
   Product product = 1;

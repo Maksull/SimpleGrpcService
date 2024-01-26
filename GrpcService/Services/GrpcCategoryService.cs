@@ -125,7 +125,7 @@ public sealed class GrpcCategoryService : CategoryServiceProto.CategoryServicePr
         ServerCallContext context)
     {
         var category = await _mediator.Send(
-            new UpdateCategoryCommand(request.Category.CategoryId, request.Category.Name),
+            new UpdateCategoryCommand(request.CategoryId, request.Name),
             context.CancellationToken);
 
         if (category is null)
