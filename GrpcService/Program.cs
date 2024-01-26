@@ -1,21 +1,27 @@
-using Application.Validators.Categories;
+using Calzolari.Grpc.AspNetCore.Validation;
 using FluentValidation;
 using GrpcService.Interceptors.ExceptionInterceptor;
 using GrpcService.Mapster;
 using GrpcService.Services;
+using GrpcService.Validators.Categories;
 using Infrastructure.Behaviors;
 using Infrastructure.Data;
 using Infrastructure.Handlers.Products;
 using Mapster;
 using MapsterMapper;
 using MediatR;
+using GetCategoryByIdQueryValidator = Application.Validators.Categories.GetCategoryByIdQueryValidator;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddGrpc(opts =>
 {
     opts.Interceptors.Add<ExceptionInterceptor>();
+    opts.EnableMessageValidation();
 });
+
+builder.Services.AddGrpcValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateCategoryRequestValidator>();
 
 builder.Services.AddSingleton<ApiDataContext>(_ =>
 {

@@ -7,6 +7,6 @@ public sealed class GetCursorPagedProductsQueryValidator : AbstractValidator<Get
 {
     public GetCursorPagedProductsQueryValidator()
     {
-        RuleFor(r => r.PageSize).GreaterThan(0);
+        RuleFor(r => r.PageSize).GreaterThan(0).LessThanOrEqualTo(50);
     }
 }

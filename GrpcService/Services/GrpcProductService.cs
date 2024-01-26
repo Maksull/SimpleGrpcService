@@ -126,8 +126,8 @@ public sealed class GrpcProductService : ProductServiceProto.ProductServiceProto
     public override async Task<UpdateProductResponse> UpdateProduct(UpdateProductRequest request,
         ServerCallContext context)
     {
-        var product = await _mediator.Send(new UpdateProductCommand(request.Product.ProductId, request.Product.Name,
-                request.Product.Description, request.Product.CategoryId),
+        var product = await _mediator.Send(new UpdateProductCommand(request.ProductId, request.Name,
+                request.Description, request.CategoryId),
             context.CancellationToken);
 
         if (product is null)
