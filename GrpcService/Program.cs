@@ -14,7 +14,6 @@ using Infrastructure.Handlers.Products;
 using Mapster;
 using MapsterMapper;
 using MediatR;
-using GetCategoryByIdQueryValidator = Application.Validators.Categories.GetCategoryByIdQueryValidator;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,7 +28,7 @@ builder.Services.AddGrpc(opts =>
     };
     opts.ResponseCompressionAlgorithm = "gzip";
     opts.ResponseCompressionLevel = CompressionLevel.Fastest; // compression level used if not set on the provider
-    
+
     opts.Interceptors.Add<ExceptionInterceptor>();
     opts.EnableMessageValidation();
 });
@@ -53,10 +52,7 @@ builder.Services.AddSingleton<IMapper>(sp => new ServiceMapper(sp, config));
 
 builder.Services.AddValidatorsFromAssembly(typeof(GetCategoryByIdQueryValidator).Assembly);
 
-builder.Services.AddMediatR(cfg =>
-{
-    cfg.RegisterServicesFromAssemblyContaining<GetProductsHandler>();
-});
+builder.Services.AddMediatR(cfg => { cfg.RegisterServicesFromAssemblyContaining<GetProductsHandler>(); });
 builder.Services.AddScoped(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
 var app = builder.Build();
