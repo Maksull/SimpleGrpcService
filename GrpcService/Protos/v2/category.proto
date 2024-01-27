@@ -1,10 +1,10 @@
 ﻿syntax = "proto3";
 
-option csharp_namespace = "SimpleGrpcProject";
+option csharp_namespace = "SimpleGrpcProject.v2";
 
 import "google/protobuf/empty.proto";
 
-package category;
+package category.v1;
 
 message Category {
   string category_id = 1;

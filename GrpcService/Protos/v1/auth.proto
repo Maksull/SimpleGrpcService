@@ -1,0 +1,25 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "SimpleGrpcProject.v1";
+
+package auth.v1;
+
+service AuthServiceProto {
+  rpc Login (LoginRequest) returns (LoginResponse);
+  rpc TestAuth (TestAuthRequest) returns (TestAuthResponse);
+}
+
+message LoginRequest {
+  string login = 1;
+  string password = 2;
+}
+message LoginResponse {
+  string jwt = 1;
+}
+
+message TestAuthRequest {
+  optional string message = 1;
+}
+message TestAuthResponse {
+  string response = 1;
+}

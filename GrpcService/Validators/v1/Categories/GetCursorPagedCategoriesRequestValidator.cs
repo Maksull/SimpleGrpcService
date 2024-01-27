@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
-using SimpleGrpcProject;
+using SimpleGrpcProject.v1;
 
-namespace GrpcService.Validators.Categories;
+namespace GrpcService.Validators.v1.Categories;
 
 public sealed class GetCursorPagedCategoriesRequestValidator : AbstractValidator<GetCursorPagedCategoriesRequest>
 {

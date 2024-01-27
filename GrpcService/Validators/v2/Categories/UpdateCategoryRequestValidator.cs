@@ -1,8 +1,8 @@
 ﻿using Application.Validators;
 using FluentValidation;
-using SimpleGrpcProject;
+using SimpleGrpcProject.v1;
 
-namespace GrpcService.Validators.Categories;
+namespace GrpcService.Validators.v2.Categories;
 
 public sealed class UpdateCategoryRequestValidator : AbstractValidator<UpdateCategoryRequest>
 {

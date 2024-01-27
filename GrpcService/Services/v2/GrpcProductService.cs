@@ -4,9 +4,9 @@ using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using MapsterMapper;
 using MediatR;
-using SimpleGrpcProject;
+using SimpleGrpcProject.v2;
 
-namespace GrpcService.Services;
+namespace GrpcService.Services.v2;
 
 public sealed class GrpcProductService : ProductServiceProto.ProductServiceProtoBase
 {

@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
-using SimpleGrpcProject;
+using SimpleGrpcProject.v2;
 
-namespace GrpcService.Validators.Categories;
+namespace GrpcService.Validators.v2.Categories;
 
 public sealed class GetPagedCategoriesRequestValidator : AbstractValidator<GetPagedCategoriesRequest>
 {
