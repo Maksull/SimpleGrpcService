@@ -17,7 +17,9 @@
     </ItemGroup>
 
     <ItemGroup>
-
+        <Protobuf Include="Protos\v1\auth.proto">
+            <Generator>MSBuild:Compile</Generator>
+        </Protobuf>
         <Protobuf Include="Protos\v1\category.proto">
             <Generator>MSBuild:Compile</Generator>
         </Protobuf>
@@ -25,6 +27,9 @@
             <Generator>MSBuild:Compile</Generator>
         </Protobuf>
 
+        <Protobuf Include="Protos\v2\auth.proto">
+            <Generator>MSBuild:Compile</Generator>
+        </Protobuf>
         <Protobuf Include="Protos\v2\category.proto">
             <Generator>MSBuild:Compile</Generator>
         </Protobuf>
