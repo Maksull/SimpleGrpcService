@@ -1,0 +1,95 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "SimpleGrpcProject.v2";
+
+import "google/protobuf/empty.proto";
+
+package product.v1;
+
+message Product {
+  string product_id = 1;
+  string name = 2;
+  string description = 3;
+  string category_id = 4;
+}
+
+service ProductServiceProto {
+  rpc GetProducts (GetProductsRequest) returns (GetProductsResponse);
+  rpc GetProductsStream (GetProductsRequest) returns (stream GetProductResponse);
+  rpc GetProduct (GetProductRequest) returns (GetProductResponse);
+  rpc GetMultipleProduct (stream GetProductRequest) returns (GetProductsResponse);
+  rpc GetProductBidirectional (stream GetProductRequest) returns (stream GetProductResponse);
+  rpc CreateProduct (CreateProductRequest) returns (CreateProductResponse);
+  rpc UpdateProduct (UpdateProductRequest) returns (UpdateProductResponse);
+  rpc DeleteProduct (DeleteProductRequest) returns (DeleteProductResponse);
+  rpc PrintProduct (stream PrintProductRequest) returns (google.protobuf.Empty);
+  rpc GetPagedProducts (stream GetPagedProductsRequest) returns (stream PagedProductsResponse);
+  rpc GetCursorPagedProducts (stream GetCursorPagedProductsRequest) returns (stream CursorPagedProductsResponse);
+}
+
+message GetProductsRequest {}
+message GetProductsResponse {
+  repeated Product products = 1;
+}
+
+message GetProductRequest {
+  string product_id = 1;
+}
+message GetProductResponse {
+  Product product = 1;
+}
+
+message CreateProductRequest {
+  string name = 1;
+  string description = 2;
+  string category_id = 3;
+}
+message CreateProductResponse {
+  Product product = 1;
+}
+
+message UpdateProductRequest {
+  string product_id = 1;
+  string name = 2;
+  string description = 3;
+  string category_id = 4;
+}
+message UpdateProductResponse {
+  Product product = 1;
+}
+
+message DeleteProductRequest {
+  string product_id = 1;
+}
+message DeleteProductResponse {
+  Product product = 1;
+}
+
+message PrintProductRequest {
+  string product = 1;
+}
+
+message GetPagedProductsRequest {
+  int32 page = 1;
+  int32 page_size = 2;
+  optional string sort_order = 3;
+}
+message PagedProductsResponse {
+  int32 page = 1;
+  int32 page_size = 2;
+  int32 total_count = 3;
+  bool is_next_page = 4;
+  bool is_previous_page = 5;
+  repeated Product items = 6;
+}
+
+message GetCursorPagedProductsRequest {
+  string cursor = 1;
+  int32 page_size = 2;
+  optional string sort_order = 3;
+}
+message CursorPagedProductsResponse {
+  string cursor = 1;
+  int32 page_size = 2;
+  repeated Product items = 3;
+}

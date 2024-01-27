@@ -17,13 +17,18 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Protobuf Include="Protos\auth.proto">
+
+        <Protobuf Include="Protos\v1\category.proto">
             <Generator>MSBuild:Compile</Generator>
         </Protobuf>
-        <Protobuf Include="Protos\category.proto">
+        <Protobuf Include="Protos\v1\product.proto">
             <Generator>MSBuild:Compile</Generator>
         </Protobuf>
-        <Protobuf Include="Protos\product.proto">
+
+        <Protobuf Include="Protos\v2\category.proto">
+            <Generator>MSBuild:Compile</Generator>
+        </Protobuf>
+        <Protobuf Include="Protos\v2\product.proto">
             <Generator>MSBuild:Compile</Generator>
         </Protobuf>
     </ItemGroup>

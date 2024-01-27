@@ -1,8 +1,8 @@
 ﻿syntax = "proto3";
 
-option csharp_namespace = "SimpleGrpcProject";
+option csharp_namespace = "SimpleGrpcProject.v2";
 
-package auth;
+package auth.v2;
 
 service AuthServiceProto {
   rpc Login (LoginRequest) returns (LoginResponse);

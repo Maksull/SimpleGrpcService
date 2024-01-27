@@ -1,8 +1,8 @@
 ﻿using Application.Validators;
 using FluentValidation;
-using SimpleGrpcProject;
+using SimpleGrpcProject.v1;
 
-namespace GrpcService.Validators.Products;
+namespace GrpcService.Validators.v1.Products;
 
 public sealed class UpdateProductRequestValidator : AbstractValidator<UpdateProductRequest>
 {

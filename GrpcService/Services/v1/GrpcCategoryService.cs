@@ -4,9 +4,9 @@ using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using MapsterMapper;
 using MediatR;
-using SimpleGrpcProject;
+using SimpleGrpcProject.v1;
 
-namespace GrpcService.Services;
+namespace GrpcService.Services.v1;
 
 public sealed class GrpcCategoryService : CategoryServiceProto.CategoryServiceProtoBase
 {
@@ -20,7 +20,7 @@ public sealed class GrpcCategoryService : CategoryServiceProto.CategoryServicePr
         _mapper = mapper;
         _logger = logger;
     }
-
+    
     public override async Task<GetCategoriesResponse> GetCategories(GetCategoriesRequest request,
         ServerCallContext context)
     {

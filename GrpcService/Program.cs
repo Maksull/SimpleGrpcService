@@ -7,14 +7,15 @@ using GrpcService.Compression;
 using GrpcService.Endpoints;
 using GrpcService.Interceptors.ExceptionInterceptor;
 using GrpcService.Mapster;
-using GrpcService.Services;
-using GrpcService.Validators.Categories;
+using GrpcService.Validators.v2.Categories;
 using Infrastructure.Behaviors;
 using Infrastructure.Data;
 using Infrastructure.Handlers.Products;
 using Mapster;
 using MapsterMapper;
 using MediatR;
+using v1 = GrpcService.Services.v1;
+using v2 = GrpcService.Services.v2;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -64,7 +65,10 @@ app.MapGet("/",
 
 app.MapProtosEndpoints();
 
-app.MapGrpcService<GrpcProductService>();
-app.MapGrpcService<GrpcCategoryService>();
+app.MapGrpcService<v1.GrpcProductService>();
+app.MapGrpcService<v1.GrpcCategoryService>();
+
+app.MapGrpcService<v2.GrpcProductService>();
+app.MapGrpcService<v2.GrpcCategoryService>();
 
 app.Run();
