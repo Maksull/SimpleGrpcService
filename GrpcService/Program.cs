@@ -1,5 +1,6 @@
 using Calzolari.Grpc.AspNetCore.Validation;
 using System.IO.Compression;
+using System.Text;
 using Application.Validators.Categories;
 using FluentValidation;
 using Grpc.Net.Compression;
@@ -14,16 +15,36 @@ using Infrastructure.Handlers.Products;
 using Mapster;
 using MapsterMapper;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using v1 = GrpcService.Services.v1;
 using v2 = GrpcService.Services.v2;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddAuthentication(opts =>
+{
+    opts.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    opts.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(opts =>
+{
+    opts.TokenValidationParameters = new()
+    {
+        ValidateIssuerSigningKey = true,
+        ValidateLifetime = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecurityKey"]!)),
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ClockSkew = TimeSpan.FromSeconds(5),
+    };
+});
+builder.Services.AddAuthorization();
+
 builder.Services.AddGrpc(opts =>
 {
     opts.MaxReceiveMessageSize = 6291456; // 6 MB
     opts.MaxSendMessageSize = 6291456; // 6 MB
-    opts.CompressionProviders = new List<ICompressionProvider>
+    opts.CompressionProviders = new List<Grpc.Net.Compression.ICompressionProvider>
     {
         new GzipCompressionProvider(CompressionLevel.Fastest), // gzip
         new BrotliCompressionProvider(CompressionLevel.Fastest) // br
@@ -59,15 +80,20 @@ builder.Services.AddScoped(typeof(IPipelineBehavior<,>), typeof(ValidationBehavi
 
 var app = builder.Build();
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapGet("/",
     () =>
         "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
 
 app.MapProtosEndpoints();
 
+app.MapGrpcService<v1.GrpcAuthService>();
 app.MapGrpcService<v1.GrpcProductService>();
 app.MapGrpcService<v1.GrpcCategoryService>();
 
+app.MapGrpcService<v2.GrpcAuthService>();
 app.MapGrpcService<v2.GrpcProductService>();
 app.MapGrpcService<v2.GrpcCategoryService>();
 
