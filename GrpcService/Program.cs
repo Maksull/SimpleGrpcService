@@ -4,6 +4,7 @@ using Application.Validators.Categories;
 using FluentValidation;
 using Grpc.Net.Compression;
 using GrpcService.Compression;
+using GrpcService.Endpoints;
 using GrpcService.Interceptors.ExceptionInterceptor;
 using GrpcService.Mapster;
 using GrpcService.Services;
@@ -60,6 +61,8 @@ var app = builder.Build();
 app.MapGet("/",
     () =>
         "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
+
+app.MapProtosEndpoints();
 
 app.MapGrpcService<GrpcProductService>();
 app.MapGrpcService<GrpcCategoryService>();
