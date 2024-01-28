@@ -1,4 +1,7 @@
-﻿namespace GrpcService.Endpoints;
+﻿using Application.Mediatr.Queries.Protos;
+using MediatR;
+
+namespace GrpcService.Endpoints;
 
 public static class ProtosEndpoints
 {
@@ -10,28 +13,20 @@ public static class ProtosEndpoints
         return app;
     }
 
-    private static IResult GetProtos(IWebHostEnvironment webHost, CancellationToken cancellationToken)
+    private static async Task<IResult> GetProtos(IMediator mediator, CancellationToken cancellationToken)
     {
-        string baseDirectory = webHost.ContentRootPath;
-
-        var protoFiles = Directory.GetDirectories($"{baseDirectory}/protos")
-            .Select(x => new { version = x, protos = Directory.GetFiles(x).Select(Path.GetFileName) })
-            .ToDictionary(o => Path.GetRelativePath("protos",
-                o.version), o => o.protos);
+        var protoFiles = await mediator.Send(new GetProtosQuery(), cancellationToken);
 
         return Results.Ok(protoFiles);
     }
 
-    private static async Task<IResult> GetProto(IWebHostEnvironment webHost, int version, string protoName,
+    private static async Task<IResult> GetProto(IMediator mediator, int version, string protoName,
         CancellationToken cancellationToken)
     {
-        string baseDirectory = webHost.ContentRootPath;
+        var protoFile = await mediator.Send(new GetProtoQuery(version, protoName), cancellationToken);
 
-        var filePath = $"{baseDirectory}/protos/v{version}/{protoName}";
-        var exist = File.Exists(filePath);
-
-        if (exist)
-            return Results.Ok(await File.ReadAllTextAsync(filePath, cancellationToken));
+        if(protoFile is not null)
+            return Results.Ok(protoFile);
 
         return Results.NotFound();
     }
