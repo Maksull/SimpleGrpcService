@@ -1,4 +1,5 @@
 ﻿using Application.Mediatr.Commands.Categories;
+using Application.Mediatr.Notifications.Categories;
 using Application.Mediatr.Queries.Categories;
 using Application.Serialization;
 using Domain.Entities;
@@ -13,11 +14,13 @@ public sealed class UpdateCategoryHandler : IRequestHandler<UpdateCategoryComman
 {
     private readonly ApiDataContext _apiDataContext;
     private readonly IMediator _mediator;
+    private readonly IPublisher _publisher;
 
-    public UpdateCategoryHandler(ApiDataContext apiDataContext, IMediator mediator)
+    public UpdateCategoryHandler(ApiDataContext apiDataContext, IMediator mediator, IPublisher publisher)
     {
         _apiDataContext = apiDataContext;
         _mediator = mediator;
+        _publisher = publisher;
     }
 
     public async Task<Category?> Handle(UpdateCategoryCommand request, CancellationToken cancellationToken)
@@ -41,9 +44,13 @@ public sealed class UpdateCategoryHandler : IRequestHandler<UpdateCategoryComman
 
         var result = await _apiDataContext.CategoriesDocuments.UpdateOneAsync(filter, update, cancellationToken: cancellationToken);
 
-        if (result.ModifiedCount != 0)
-            return updateCategory;
+        if (result.ModifiedCount == 0)
+        {
+            return null;
+        }
 
-        return null;
+        await _publisher.Publish(new CategoryUpdated(request.CategoryId), cancellationToken);
+
+        return updateCategory;
     }
 }
