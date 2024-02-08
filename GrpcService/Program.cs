@@ -1,7 +1,5 @@
-using Calzolari.Grpc.AspNetCore.Validation;
-using System.IO.Compression;
-using System.Text;
 using Application.Validators.Categories;
+using Calzolari.Grpc.AspNetCore.Validation;
 using FluentValidation;
 using Grpc.Net.Compression;
 using GrpcService.Compression;
@@ -12,15 +10,16 @@ using GrpcService.Validators.v2.Categories;
 using Infrastructure.Behaviors;
 using Infrastructure.Data;
 using Infrastructure.Handlers.Products;
+using Infrastructure.Services;
+using Infrastructure.Services.Interfaces;
 using Mapster;
 using MapsterMapper;
-using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using System.IO.Compression;
+using System.Text;
 using v1 = GrpcService.Services.v1;
 using v2 = GrpcService.Services.v2;
-using Infrastructure.Services.Interfaces;
-using Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -80,8 +79,8 @@ builder.Services.AddValidatorsFromAssembly(typeof(GetCategoryByIdQueryValidator)
 builder.Services.AddMediatR(cfg =>
 {
     cfg.RegisterServicesFromAssemblyContaining<GetProductsHandler>();
-    cfg.AddOpenBehavior(typeof(QueryCachingBehavior<,>));
     cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
+    cfg.AddOpenBehavior(typeof(QueryCachingBehavior<,>));
 });
 
 
