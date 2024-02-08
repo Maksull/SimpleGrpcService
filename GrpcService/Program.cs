@@ -19,6 +19,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using v1 = GrpcService.Services.v1;
 using v2 = GrpcService.Services.v2;
+using Infrastructure.Services.Interfaces;
+using Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -75,8 +77,20 @@ builder.Services.AddSingleton<IMapper>(sp => new ServiceMapper(sp, config));
 
 builder.Services.AddValidatorsFromAssembly(typeof(GetCategoryByIdQueryValidator).Assembly);
 
-builder.Services.AddMediatR(cfg => { cfg.RegisterServicesFromAssemblyContaining<GetProductsHandler>(); });
-builder.Services.AddScoped(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssemblyContaining<GetProductsHandler>();
+    cfg.AddOpenBehavior(typeof(QueryCachingBehavior<,>));
+    cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
+});
+
+
+builder.Services.AddStackExchangeRedisCache(opts =>
+{
+    opts.Configuration = builder.Configuration.GetConnectionString("RedisCache");
+});
+
+builder.Services.AddSingleton<ICacheService, CacheService>();
 
 var app = builder.Build();
 
