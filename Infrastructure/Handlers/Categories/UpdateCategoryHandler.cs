@@ -45,9 +45,7 @@ public sealed class UpdateCategoryHandler : IRequestHandler<UpdateCategoryComman
         var result = await _apiDataContext.CategoriesDocuments.UpdateOneAsync(filter, update, cancellationToken: cancellationToken);
 
         if (result.ModifiedCount == 0)
-        {
             return null;
-        }
 
         await _publisher.Publish(new CategoryUpdated(request.CategoryId), cancellationToken);
 

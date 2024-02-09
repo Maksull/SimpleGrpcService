@@ -23,45 +23,43 @@ public class CacheService : ICacheService
         _logger = logger;
     }
 
-    public async Task<T?> GetAsync<T>(string key) where T : class
+    public async Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken) where T : class
     {
         try
         {
             if (IsReconnect())
-            {
                 await Reconnect();
-            }
-            else if (!_isConnectionError)
-            {
-                var cachedValue = await _cache.GetAsync(key, CancellationToken.None);
 
-                if (cachedValue is null) return default;
+            if (!_isConnectionError)
+            {
+                var cachedValue = await _cache.GetAsync(key, cancellationToken);
+
+                if (cachedValue is null) return null;
 
                 var value = ProtoBufSerializer.ByteArrayToClass<T>(cachedValue);
 
                 return value;
             }
 
-            return default;
+            return null;
         }
         catch (RedisConnectionException e)
         {
             _isConnectionError = true;
             _logger.LogCritical("Redis connection failed: {RedisConnectionError}", e.ToString());
 
-            return default;
+            return null;
         }
     }
 
-    public async Task SetAsync<T>(string key, T value, TimeSpan? absoluteExpiration) where T : class
+    public async Task SetAsync<T>(string key, T value, TimeSpan? absoluteExpiration, CancellationToken cancellationToken) where T : class
     {
         try
         {
             if (IsReconnect())
-            {
                 await Reconnect();
-            }
-            else if (!_isConnectionError)
+
+            if (!_isConnectionError)
             {
                 var valueToCache = ProtoBufSerializer.ClassToByteArray(value);
 
@@ -69,7 +67,7 @@ public class CacheService : ICacheService
                     .SetSlidingExpiration(TimeSpan.FromSeconds(180))
                     .SetAbsoluteExpiration(absoluteExpiration ?? TimeSpan.FromSeconds(3600));
 
-                await _cache.SetAsync(key, valueToCache, cacheEntryOptions, CancellationToken.None);
+                await _cache.SetAsync(key, valueToCache, cacheEntryOptions, cancellationToken);
             }
         }
         catch (RedisConnectionException e)
@@ -79,17 +77,16 @@ public class CacheService : ICacheService
         }
     }
 
-    public async Task RemoveAsync(string key)
+    public async Task RemoveAsync(string key, CancellationToken cancellationToken)
     {
         try
         {
             if (IsReconnect())
-            {
                 await Reconnect();
-            }
-            else if (!_isConnectionError)
+
+            if (!_isConnectionError)
             {
-                await _cache.RemoveAsync(key);
+                await _cache.RemoveAsync(key, cancellationToken);
             }
         }
         catch (RedisConnectionException e)
@@ -101,9 +98,9 @@ public class CacheService : ICacheService
 
     private bool IsReconnect()
     {
-        const double timeBeforeReconnect = 2;
+        const double minutesBeforeReconnect = 2;
 
-        return _isConnectionError && (DateTime.UtcNow - _lastReconnectAttempt).TotalMinutes >= timeBeforeReconnect;
+        return _isConnectionError && (DateTime.UtcNow - _lastReconnectAttempt).TotalMinutes >= minutesBeforeReconnect;
     }
 
     private async Task Reconnect()
