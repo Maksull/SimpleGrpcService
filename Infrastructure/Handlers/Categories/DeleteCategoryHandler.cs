@@ -34,9 +34,7 @@ public sealed class DeleteCategoryHandler : IRequestHandler<DeleteCategoryComman
         var result = await _apiDataContext.CategoriesDocuments.DeleteOneAsync(filter, cancellationToken);
 
         if (result.DeletedCount == 0)
-        {
             return null;
-        }
 
         await _publisher.Publish(new CategoryDeleted(request.Id), cancellationToken);
 
