@@ -3,7 +3,7 @@ using Application.Mediatr.Notifications.Products;
 using Application.Mediatr.Queries.Categories;
 using Application.Mediatr.Queries.Products;
 using Application.Serialization;
-using Domain.Entities;
+using Domain.Entities.Product;
 using Infrastructure.Data;
 using MediatR;
 using MongoDB.Bson;

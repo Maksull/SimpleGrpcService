@@ -1,7 +1,7 @@
 ﻿using Application.Mediatr.Commands.Products;
 using Application.Mediatr.Notifications.Products;
 using Application.Mediatr.Queries.Products;
-using Domain.Entities;
+using Domain.Entities.Product;
 using Infrastructure.Data;
 using MediatR;
 using MongoDB.Bson;
@@ -31,6 +31,8 @@ public sealed class DeleteProductHandler : IRequestHandler<DeleteProductCommand,
 
         var filter = Builders<BsonDocument>.Filter.Eq("_id", product.ProductId);
 
+        await _mediator.Send(new AddProductToDeletedProductsCommand(product), cancellationToken);
+        
         var result = await _apiDataContext.ProductsDocuments.DeleteOneAsync(filter, cancellationToken);
 
         if (result.DeletedCount == 0)

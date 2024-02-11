@@ -1,5 +1,6 @@
 ﻿using Application.Serialization;
-using Domain.Entities;
+using Domain.Entities.Category;
+using Domain.Entities.Product;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -8,7 +9,9 @@ namespace Infrastructure.Data;
 public sealed class ApiDataContext
 {
     private readonly IMongoCollection<BsonDocument> _categoriesDocuments;
+    private readonly IMongoCollection<BsonDocument> _deletedCategoriesDocuments;
     private readonly IMongoCollection<BsonDocument> _productsDocuments;
+    private readonly IMongoCollection<BsonDocument> _deletedProductsDocuments;
     
     public ApiDataContext(string connectionString, string databaseName)
     {
@@ -16,7 +19,9 @@ public sealed class ApiDataContext
         var database = client.GetDatabase(databaseName);
 
         _categoriesDocuments = database.GetCollection<BsonDocument>("Categories");
+        _deletedCategoriesDocuments = database.GetCollection<BsonDocument>("DeletedCategories");
         _productsDocuments = database.GetCollection<BsonDocument>("Products");
+        _deletedProductsDocuments = database.GetCollection<BsonDocument>("DeletedProducts");
 
         // Seed initial data
         SeedData();
@@ -73,5 +78,7 @@ public sealed class ApiDataContext
     }
 
     public IMongoCollection<BsonDocument> CategoriesDocuments => _categoriesDocuments;
+    public IMongoCollection<BsonDocument> DeletedCategoriesDocuments => _deletedCategoriesDocuments;
     public IMongoCollection<BsonDocument> ProductsDocuments => _productsDocuments;
+    public IMongoCollection<BsonDocument> DeletedProductsDocuments => _deletedProductsDocuments;
 }

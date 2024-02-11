@@ -1,6 +1,7 @@
 ﻿using Application.Mediatr.Generics;
 using Domain.Contracts;
 using Domain.Entities;
+using Domain.Entities.Product;
 
 namespace Application.Mediatr.Queries.Products;
 

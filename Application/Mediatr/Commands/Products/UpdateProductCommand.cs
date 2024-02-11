@@ -1,4 +1,5 @@
 ﻿using Domain.Entities;
+using Domain.Entities.Product;
 using MediatR;
 
 namespace Application.Mediatr.Commands.Products;

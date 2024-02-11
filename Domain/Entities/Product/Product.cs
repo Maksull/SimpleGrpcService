@@ -2,10 +2,10 @@
 using MongoDB.Bson.Serialization.Attributes;
 using ProtoBuf;
 
-namespace Domain.Entities;
+namespace Domain.Entities.Product;
 
 [ProtoContract]
-public sealed class Product
+public class Product
 {
     private string _productId = string.Empty;
     

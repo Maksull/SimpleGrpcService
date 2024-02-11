@@ -1,7 +1,7 @@
 ﻿using Application.Mediatr.Commands.Categories;
 using Application.Mediatr.Notifications.Categories;
 using Application.Mediatr.Queries.Categories;
-using Domain.Entities;
+using Domain.Entities.Category;
 using Infrastructure.Data;
 using MediatR;
 using MongoDB.Bson;
@@ -31,6 +31,8 @@ public sealed class DeleteCategoryHandler : IRequestHandler<DeleteCategoryComman
 
         var filter = Builders<BsonDocument>.Filter.Eq("_id", request.Id);
 
+        await _mediator.Send(new AddCategoryToDeletedCategoriesCommand(category), cancellationToken);
+        
         var result = await _apiDataContext.CategoriesDocuments.DeleteOneAsync(filter, cancellationToken);
 
         if (result.DeletedCount == 0)
