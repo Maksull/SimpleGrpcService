@@ -17,7 +17,7 @@ public sealed class QueryCachingBehavior<TRequest, TResponse> : IPipelineBehavio
 
     public async Task<TResponse?> Handle(TRequest request, RequestHandlerDelegate<TResponse?> next, CancellationToken cancellationToken)
     {
-        var cachedValue = await _cacheService.GetAsync<TResponse>(request.Key);
+        var cachedValue = await _cacheService.GetAsync<TResponse>(request.Key, cancellationToken);
 
         if (cachedValue is not null)
             return cachedValue;
@@ -25,7 +25,7 @@ public sealed class QueryCachingBehavior<TRequest, TResponse> : IPipelineBehavio
         var value = await next();
 
         if (value is not null)
-            await _cacheService.SetAsync(request.Key, value, request.Expiration);
+            await _cacheService.SetAsync(request.Key, value, request.Expiration, cancellationToken);
 
         return value;
     }

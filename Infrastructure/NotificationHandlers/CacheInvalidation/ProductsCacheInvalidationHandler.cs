@@ -18,22 +18,22 @@ public sealed class ProductsCacheInvalidationHandler :
 
     public async Task Handle(ProductDeleted notification, CancellationToken cancellationToken)
     {
-        await InvalidateProductsCacheEntries(notification.Id);
+        await InvalidateProductsCacheEntries(notification.Id, cancellationToken);
     }
 
     public async Task Handle(ProductUpdated notification, CancellationToken cancellationToken)
     {
-        await InvalidateProductsCacheEntries(notification.Id);
+        await InvalidateProductsCacheEntries(notification.Id, cancellationToken);
     }
 
     public async Task Handle(ProductCreated notification, CancellationToken cancellationToken)
     {
-        await _cacheService.RemoveAsync("products");
+        await _cacheService.RemoveAsync("products", cancellationToken);
     }
 
-    private async Task InvalidateProductsCacheEntries(string productId)
+    private async Task InvalidateProductsCacheEntries(string productId, CancellationToken cancellationToken)
     {
-        await _cacheService.RemoveAsync("products");
-        await _cacheService.RemoveAsync($"product-by-id-{productId}");
+        await _cacheService.RemoveAsync("products", cancellationToken);
+        await _cacheService.RemoveAsync($"product-by-id-{productId}", cancellationToken);
     }
 }
