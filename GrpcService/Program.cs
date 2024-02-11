@@ -18,6 +18,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.IO.Compression;
 using System.Text;
+using Infrastructure.BackgroundJobs;
+using Quartz;
 using v1 = GrpcService.Services.v1;
 using v2 = GrpcService.Services.v2;
 
@@ -33,7 +35,8 @@ builder.Services.AddAuthentication(opts =>
     {
         ValidateIssuerSigningKey = true,
         ValidateLifetime = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecurityKey"]!)),
+        IssuerSigningKey =
+            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecurityKey"]!)),
         ValidateIssuer = false,
         ValidateAudience = false,
         ClockSkew = TimeSpan.FromSeconds(5),
@@ -90,6 +93,21 @@ builder.Services.AddStackExchangeRedisCache(opts =>
 });
 
 builder.Services.AddSingleton<ICacheService, CacheService>();
+
+builder.Services.AddQuartz(opts =>
+{
+    var jobKeyCategories = JobKey.Create(nameof(DeleteCategoriesPermanentlyJob));
+    var jobKeyProducts = JobKey.Create(nameof(DeleteProductsPermanentlyJob));
+
+    opts.AddJob<DeleteCategoriesPermanentlyJob>(jobKeyCategories)
+        .AddTrigger(trigger =>
+            trigger.ForJob(jobKeyCategories).WithSimpleSchedule(schedule => schedule.RepeatForever().WithIntervalInSeconds(4)));
+    opts.AddJob<DeleteProductsPermanentlyJob>(jobKeyProducts)
+        .AddTrigger(trigger =>
+            trigger.ForJob(jobKeyProducts).WithSimpleSchedule(schedule => schedule.RepeatForever().WithIntervalInSeconds(4)));
+});
+
+builder.Services.AddQuartzHostedService();
 
 var app = builder.Build();
 
