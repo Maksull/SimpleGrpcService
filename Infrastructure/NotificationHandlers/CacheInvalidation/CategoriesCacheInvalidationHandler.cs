@@ -18,22 +18,22 @@ public sealed class CategoriesCacheInvalidationHandler :
 
     public async Task Handle(CategoryDeleted notification, CancellationToken cancellationToken)
     {
-        await InvalidateCategoriesCacheEntries(notification.Id);
+        await InvalidateCategoriesCacheEntries(notification.Id, cancellationToken);
     }
 
     public async Task Handle(CategoryUpdated notification, CancellationToken cancellationToken)
     {
-        await InvalidateCategoriesCacheEntries(notification.Id);
+        await InvalidateCategoriesCacheEntries(notification.Id, cancellationToken);
     }
 
     public async Task Handle(CategoryCreated notification, CancellationToken cancellationToken)
     {
-        await _cacheService.RemoveAsync("categories");
+        await _cacheService.RemoveAsync("categories", cancellationToken);
     }
 
-    private async Task InvalidateCategoriesCacheEntries(string categoryId)
+    private async Task InvalidateCategoriesCacheEntries(string categoryId, CancellationToken cancellationToken)
     {
-        await _cacheService.RemoveAsync("categories");
-        await _cacheService.RemoveAsync($"category-by-id-{categoryId}");
+        await _cacheService.RemoveAsync("categories", cancellationToken);
+        await _cacheService.RemoveAsync($"category-by-id-{categoryId}", cancellationToken);
     }
 }
