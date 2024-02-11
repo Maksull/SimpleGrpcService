@@ -1,7 +1,7 @@
 ﻿using Application.Mediatr.Commands.Categories;
 using Application.Mediatr.Notifications.Categories;
 using Application.Serialization;
-using Domain.Entities;
+using Domain.Entities.Category;
 using Infrastructure.Data;
 using MediatR;
 using MongoDB.Bson;

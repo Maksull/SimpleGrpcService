@@ -1,5 +1,6 @@
 ﻿using Application.Mediatr.Generics;
 using Domain.Entities;
+using Domain.Entities.Category;
 
 namespace Application.Mediatr.Queries.Categories;
 

@@ -2,10 +2,10 @@
 using MongoDB.Bson.Serialization.Attributes;
 using ProtoBuf;
 
-namespace Domain.Entities;
+namespace Domain.Entities.Category;
 
 [ProtoContract]
-public sealed class Category
+public class Category
 {
     private string _categoryId = string.Empty;
 

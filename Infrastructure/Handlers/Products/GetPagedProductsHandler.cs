@@ -1,7 +1,7 @@
 ﻿using Application.Mediatr.Queries.Products;
 using Application.Serialization;
 using Domain.Contracts;
-using Domain.Entities;
+using Domain.Entities.Product;
 using Infrastructure.Data;
 using MediatR;
 using MongoDB.Driver;
