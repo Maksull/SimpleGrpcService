@@ -7,7 +7,8 @@ using MongoDB.Bson;
 
 namespace Infrastructure.Handlers.Categories;
 
-public sealed class AddCategoryToDeletedCategoriesHandler : IRequestHandler<AddCategoryToDeletedCategoriesCommand, DeletedCategory?>
+public sealed class
+    AddCategoryToDeletedCategoriesHandler : IRequestHandler<AddCategoryToDeletedCategoriesCommand, DeletedCategory?>
 {
     private readonly ApiDataContext _apiDataContext;
 
@@ -16,7 +17,8 @@ public sealed class AddCategoryToDeletedCategoriesHandler : IRequestHandler<AddC
         _apiDataContext = apiDataContext;
     }
 
-    public async Task<DeletedCategory?> Handle(AddCategoryToDeletedCategoriesCommand request, CancellationToken cancellationToken)
+    public async Task<DeletedCategory?> Handle(AddCategoryToDeletedCategoriesCommand request,
+        CancellationToken cancellationToken)
     {
         DeletedCategory deletedCategory = new()
         {
@@ -24,6 +26,7 @@ public sealed class AddCategoryToDeletedCategoriesHandler : IRequestHandler<AddC
             CategoryId = request.Category.CategoryId,
             Name = request.Category.Name,
             DeletedAt = DateTime.UtcNow,
+            DeleteAt = DateTime.UtcNow.AddMinutes(5),
         };
 
         var serializedData = ProtoBufSerializer.ClassToByteArray(deletedCategory);
@@ -32,7 +35,8 @@ public sealed class AddCategoryToDeletedCategoriesHandler : IRequestHandler<AddC
         {
             { "_id", deletedCategory.DeletedCategoryId },
             { "protobufData", serializedData },
-            { "DeletedAt", deletedCategory.DeletedAt}
+            { "deletedAt", deletedCategory.DeletedAt },
+            { "deleteAt", deletedCategory.DeleteAt },
         };
 
         await _apiDataContext.DeletedCategoriesDocuments.InsertOneAsync(document, cancellationToken: cancellationToken);

@@ -23,4 +23,6 @@ public sealed class DeletedCategory : Category
     }
     [ProtoMember(4)] 
     public required DateTime DeletedAt { get; set; }
+    [ProtoMember(5)] 
+    public required DateTime DeleteAt { get; set; }
 }
