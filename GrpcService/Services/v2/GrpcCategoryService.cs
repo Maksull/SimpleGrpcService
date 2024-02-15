@@ -1,4 +1,5 @@
-﻿using Application.Mediatr.Commands.Categories;
+﻿using Application.Logging.GrpcServices;
+using Application.Mediatr.Commands.Categories;
 using Application.Mediatr.Queries.Categories;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
@@ -161,7 +162,7 @@ public sealed class GrpcCategoryService : CategoryServiceProto.CategoryServicePr
     {
         await foreach (var request in requestStream.ReadAllAsync())
         {
-            _logger.LogInformation("Print category {PrintCategory}", request.Category);
+            _logger.LogIncoming(request.Category);
         }
 
         return new();

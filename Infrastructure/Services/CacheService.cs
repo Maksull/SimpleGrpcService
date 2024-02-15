@@ -1,4 +1,5 @@
-﻿using Application.Serialization;
+﻿using Application.Logging.Caching;
+using Application.Serialization;
 using Infrastructure.Services.Interfaces;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
@@ -46,7 +47,7 @@ public class CacheService : ICacheService
         catch (RedisConnectionException e)
         {
             _isConnectionError = true;
-            _logger.LogCritical("Redis connection failed: {RedisConnectionError}", e.ToString());
+            _logger.LogRedisConnectionFailed(e.ToString());
 
             return null;
         }
@@ -73,7 +74,7 @@ public class CacheService : ICacheService
         catch (RedisConnectionException e)
         {
             _isConnectionError = true;
-            _logger.LogCritical("Redis connection failed: {RedisConnectionError}", e.ToString());
+            _logger.LogRedisConnectionFailed(e.ToString());
         }
     }
 
@@ -92,7 +93,7 @@ public class CacheService : ICacheService
         catch (RedisConnectionException e)
         {
             _isConnectionError = true;
-            _logger.LogCritical("Redis connection failed: {RedisConnectionError}", e.ToString());
+            _logger.LogRedisConnectionFailed(e.ToString());
         }
     }
 
@@ -124,7 +125,7 @@ public class CacheService : ICacheService
         }
         catch (RedisConnectionException e)
         {
-            _logger.LogCritical("Redis reconnect failed: {RedisReconnectError}", e.ToString());
+            _logger.LogRedisConnectionFailed(e.ToString());
         }
     }
 }
