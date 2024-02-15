@@ -1,4 +1,5 @@
-﻿using Application.Mediatr.Commands.Products;
+﻿using Application.Logging.GrpcServices;
+using Application.Mediatr.Commands.Products;
 using Application.Mediatr.Queries.Products;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
@@ -163,7 +164,7 @@ public sealed class GrpcProductService : ProductServiceProto.ProductServiceProto
     {
         await foreach (var request in requestStream.ReadAllAsync())
         {
-            _logger.LogInformation("Print product {PrintProduct}", request.Product);
+            _logger.LogIncoming(request.Product);
         }
 
         return new();

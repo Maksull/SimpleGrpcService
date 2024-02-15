@@ -22,7 +22,7 @@ public sealed class ExceptionInterceptor : Interceptor
         }
         catch (Exception e)
         {
-            throw e.Handle(context, _logger);
+            throw e.Handle(_logger);
         }
     }
 
@@ -36,7 +36,7 @@ public sealed class ExceptionInterceptor : Interceptor
         }
         catch (Exception e)
         {
-            throw e.Handle(context, _logger);
+            throw e.Handle(_logger);
         }
     }
     
@@ -50,7 +50,7 @@ public sealed class ExceptionInterceptor : Interceptor
         }
         catch (Exception e)
         {
-            throw e.Handle(context, _logger);
+            throw e.Handle(_logger);
         }
     }
 
@@ -64,7 +64,7 @@ public sealed class ExceptionInterceptor : Interceptor
         }
         catch (Exception e)
         {
-            throw e.Handle(context, _logger);
+            throw e.Handle(_logger);
         }
     }
 }
